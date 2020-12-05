@@ -15,12 +15,12 @@ from itertools import combinations
 from operator import itemgetter
 
 
-def load_data(fptr, columns=[], n_training=24):
+def load_data(fptr, columns=[], n_training=32):
     '''
     Loads data from an Excel file containing possible parameters (Linker functional group classification, linker pKa,
     Metal d electron count, metal electronegativity, metal charge in MOF complex, linker molecular weight, number of
-    atoms coordinated to metal atoms within a single linker molecule, and Langmuir surface area) to use as inputs to NN,
-    MOF names to use as labels, and chemical stability classification for MOFs used as outputs.
+    metal atoms bound to a single linker molecule, and Langmuir surface area) to use as inputs to NN, MOF names to use
+    as labels, and chemical stability classification for MOFs used as outputs.
 
      **Parameters**
 
@@ -159,7 +159,7 @@ def evaluate_inputs(x_train_tot, y_train, x_test_tot, y_test, params, filename='
     return x_train_opt, x_test_opt
 
 
-def build_network(x_train, y_train, x_test, y_test, n_epoch=200):
+def build_network(x_train, y_train, x_test, y_test, n_epoch=300):
     '''
     This function builds and trains the neural network.
 
@@ -188,10 +188,10 @@ def build_network(x_train, y_train, x_test, y_test, n_epoch=200):
     model = Sequential()
     # Add first layer with input as vector with an index for each pixel
     model.add(Dense(7, input_shape=(3,), activation='relu'))
-    model.add(Dropout(0.4))
+    model.add(Dropout(0.5))
     # Add second layer. Don't have to specify shape any more.
     model.add(Dense(4, activation='relu'))
-    model.add(Dropout(0.4))
+    model.add(Dropout(0.5))
     # Add final layer, reducing # of nodes to 1 corresponding to predicted chemical stability classification
     model.add(Dense(4, activation='softmax'))
 
@@ -353,7 +353,7 @@ def plot_model(x_train, y_train, x_test, y_test, mofs, model, train_plot='MOF_Ch
     assert train_plot[-4:] == test_plot[-4:] == '.png', "Figures should be saved as a .png file"
 
     assert len(x_train[0]) == len(x_test[0]) == 3, "Should only have three inputs for plot_model"
-    assert len(x_train) == 24, "Should have data for 24 MOFs in x_train"
+    assert len(x_train) >= 24, "Should have data for at least 24 MOFs in x_train"
     assert len(x_test) >= 8, "Should have data for at least 8 MOFs in x_test"
 
     # Generate predicted values with the improved model

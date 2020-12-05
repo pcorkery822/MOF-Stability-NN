@@ -15,12 +15,12 @@ from itertools import combinations
 from operator import itemgetter
 
 
-def load_data(fptr, columns=[], n_training=24):
+def load_data(fptr, columns=[], n_training=32):
     '''
     Loads data from an Excel file containing possible parameters (Linker functional group classification, linker pKa,
     Metal d electron count, metal electronegativity, metal charge in MOF complex, linker molecular weight, number of
-    atoms coordinated to metal atoms within a single linker molecule, and Langmuir surface area) to use as inputs to NN,
-    MOF names to use as labels, and thermal decomposition temperatures for MOFs used as outputs.
+    atoms bound by a single linker molecule, and Langmuir surface area) to use as inputs to NN, MOF names to use as
+    labels, and thermal decomposition temperatures for MOFs used as outputs.
 
      **Parameters**
 
@@ -132,7 +132,7 @@ def evaluate_inputs(x_train_tot, y_train, x_test_tot, y_test, params, filename='
     poss_combos = combinations(num_params, 3)
     results = []
     columns_list = []
-    print("X Variables \t \t Training MSE \t Testing MSE")
+    print("X Variables \t \t Training MAPE \t Testing MAPE")
 
     for i in poss_combos:
         x_train = x_train_tot[:, [i[0], i[1], i[2]]]
