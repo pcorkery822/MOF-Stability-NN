@@ -1,7 +1,8 @@
 '''
 Dataset contains information about metals centers, organic linkers, and structures of various MOFs. The temperature at
 which decomposition is observed in thermo-gravimetric analysis (TGA) was used to determine the thermal stability of the
-MOF.
+MOF.This file will read data from an Excel file, choose the optimum parameters for a neural network, build and
+save the resulting neural network generate and save plots using the neural network.
 '''
 import numpy as np
 import matplotlib.pyplot as plt
@@ -15,17 +16,19 @@ from itertools import combinations
 from operator import itemgetter
 
 
-def load_data(fptr, columns=[], n_training=32):
+def load_data(fptr="ThermalStability.xlsx", columns=[], n_training=32):
     '''
     Loads data from an Excel file containing possible parameters (Linker functional group classification, linker pKa,
     Metal d electron count, metal electronegativity, metal charge in MOF complex, linker molecular weight, number of
-    atoms bound by a single linker molecule, and Langmuir surface area) to use as inputs to NN, MOF names to use as
-    labels, and thermal decomposition temperatures for MOFs used as outputs.
+    atoms bound by a single linker molecule, and Langmuir surface area for the default file) to use as inputs to NN,
+    MOF names to use as labels, and thermal decomposition temperatures for MOFs used as outputs.
 
      **Parameters**
 
         fptr: *str*
-            name of file containing data
+            name of file containing data. Parameters should begin in fifth column of this file and the columns should
+            have headers that will be used as labels for parameters. The last column should contain the thermal
+            decomposition temperatures of the MOF.
         columns: *list*
             allows a user to specify three possible parameters from those listed above to be extracted from the Excel
             file. This allows another python script to access this function to use with a pre-existing model.
@@ -71,7 +74,7 @@ def load_data(fptr, columns=[], n_training=32):
             for i in columns:
                 data[j - 1, i - 4] = dataset.cell_value(j, i)
                 params.append(dataset.cell_value(0, i))
-                data[j - 1, 3] = dataset.cell_value(j, 12)
+                data[j - 1, 3] = dataset.cell_value(j, n_cols - 1)
         print("Selected Parameters:", params[0], params[1], params[2])
         x_train = data[0:n_training, 0:3]
         y_train = data[0:n_training, 3]
@@ -90,10 +93,10 @@ def load_data(fptr, columns=[], n_training=32):
         params.append(dataset.cell_value(0, i))
 
     # Separate Training and Testing Data Sets
-    x_train_tot = data[0:24, 0:8]
-    y_train = data[0:24, 8]
-    x_test_tot = data[24:num_MOFs, 0:8]
-    y_test = data[24:num_MOFs, 8]
+    x_train_tot = data[0:n_training, 0:dataset.ncols - 5]
+    y_train = data[0:n_training, dataset.ncols - 5]
+    x_test_tot = data[n_training:num_MOFs, 0:dataset.ncols - 5]
+    y_test = data[n_training:num_MOFs, dataset.ncols - 5]
 
     return (x_train_tot, y_train), (x_test_tot, y_test), params, mofs
 

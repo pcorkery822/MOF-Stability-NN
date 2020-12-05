@@ -1,8 +1,10 @@
 '''
-Dataset contains information about metals centers, organic linkers, and structures of various MOFs. The stability of the
-MOF with respect to the medium it was stored in is also contained within the dataset and was treated as the y variable
-for the models here [0 is air sensitive; 1 is air stable, but degrades in liquid water; 2 is stable in room temperature
-water, but degrades in mildly acidic and/or basic water and/or boiling water; 3 is stable in all the above conditions].
+Default file contains information about metals centers, organic linkers, and structures of various MOFs. The stability
+of the MOF with respect to the medium it was stored in is also contained within the dataset and was treated as the y
+variable for the models here [0 is air sensitive; 1 is air stable, but degrades in liquid water; 2 is stable in room
+temperature water, but degrades in mildly acidic and/or basic water and/or boiling water; 3 is stable in all the above
+conditions]. This file will read data from an Excel file, choose the optimum parameters for a neural network, build and
+save the resulting neural network generate and save plots using the neural network.
 '''
 import numpy as np
 import matplotlib.pyplot as plt
@@ -15,7 +17,7 @@ from itertools import combinations
 from operator import itemgetter
 
 
-def load_data(fptr, columns=[], n_training=32):
+def load_data(fptr='WaterStability.xlsx', columns=[], n_training=32):
     '''
     Loads data from an Excel file containing possible parameters (Linker functional group classification, linker pKa,
     Metal d electron count, metal electronegativity, metal charge in MOF complex, linker molecular weight, number of
@@ -25,7 +27,9 @@ def load_data(fptr, columns=[], n_training=32):
      **Parameters**
 
         fptr: *str*
-            name of file containing data.
+            name of file containing data. Parameters should begin in fifth column of this file and the columns should
+            have headers that will be used as labels for parameters. The last column should contain the chemical
+            stability classification of the MOFs.
         columns: *list*
             allows a user to specify three possible parameters from those listed above to be extracted from the Excel
             file. This allows another python script to access this function to use with a pre-existing model.
@@ -67,7 +71,7 @@ def load_data(fptr, columns=[], n_training=32):
             for i in columns:
                 data[j - 1, i - 4] = dataset.cell_value(j, i)
                 params.append(dataset.cell_value(0, i))
-                data[j - 1, 3] = dataset.cell_value(j, 12)
+                data[j - 1, 3] = dataset.cell_value(j, n_cols - 1)
         print("Selected Parameters:", params[0], params[1], params[2])
         x_train = data[0:n_training, 0:3]
         y_train = data[0:n_training, 3]
@@ -87,10 +91,10 @@ def load_data(fptr, columns=[], n_training=32):
             params.append(dataset.cell_value(0, i))
 
         # Separate Training and Testing Data Sets
-        x_train_tot = data[0:n_training, 0:8]
-        y_train = data[0:n_training, 8]
-        x_test_tot = data[n_training:num_MOFs, 0:8]
-        y_test = data[n_training:num_MOFs, 8]
+        x_train_tot = data[0:n_training, 0:dataset.ncols - 5]
+        y_train = data[0:n_training, dataset.ncols - 5]
+        x_test_tot = data[n_training:num_MOFs, 0:dataset.ncols - 5]
+        y_test = data[n_training:num_MOFs, dataset.ncols - 5]
 
         return (x_train_tot, y_train), (x_test_tot, y_test), params, mofs
 
